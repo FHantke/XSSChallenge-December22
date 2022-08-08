@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1>{{Login}}</h1>
+<form action='/login' method='POST' class="form-inline">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+    <div class="row g-3 align-items-center">        
+        <div class="col">              
+            <input class="form-control" type="text" id="name" name="name" placeholder="Username"></input>
+        </div>                
+        <div class="col">
+            <button type="submit" class="btn btn-primary">Login</button>
+        </col>
+    </div>
+</form>
+
+{% endblock %}

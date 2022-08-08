@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="{{ url_for('static', filename = 'bootstrap.min.css')}}" rel="stylesheet">
+
+    <title>HackerBlog</title>
+  </head>
+  <body>
+    <!-- As a link -->
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="/">
+            HackerBlog      
+            {% if current_user.is_authenticated %}
+            - {{current_user.username}}
+            {% endif %}
+          </a>
+          {% if current_user.is_authenticated %}
+            <a class="nav-link" href="/edit">Edit</a>
+            <a class="nav-link" href="/logout">Logout</a>
+          {% else %}
+            <a class="nav-link" href="/login">Login</a>
+          {% endif %}
+        </div>
+    </nav>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }}" role="alert">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+    {% endwith %}
+    
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+
+    <script nonce='{{nonce}}' src="{{ url_for('static', filename = 'bootstrap.bundle.min.js')}}"></script>
+  </body>
+</html>

@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1>Edit Content</h1>
+ <p>
+    Edit your blog here and share it later with your friends.
+    You can use HTML if you want, but don't do shady things!
+ </p>
+ 
+<div id="tags-output" class="row m-2"></div>
+
+<form action="/edit" method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+    <textarea class="form-control" id="content-area" rows="15" name="content">
+    {{ current_user.content|safe }}
+    </textarea>
+    
+    <p>Add tags to your blog (seperated with commas)!</p>
+    <input type="text" class="form-control" name="tags" placeholder="Tags" value="{{ current_user.tags }}"/>    
+    <button id="comment" type="submit" class="btn btn-primary mt-3">Save</button>
+</form>
+
+
+<script nonce='{{nonce}}'>
+    function update_tags(tags_input) {
+        let tags = tags_input.value.split(',');
+        let tags_output = document.querySelector("#tags-output");
+        tags_output.innerHTML = "";
+        tags = tags.filter(i => i.trim());
+
+        console.log("We are all tags:")
+        console.log(tags)        
+        console.log("End tags")
+
+        tags.forEach(element => {
+            element = element.trim();
+            let div = document.createElement("div");
+            div.classList.add("col-2", "m-1", "border", "rounded", "bg-info");
+            div.id = element;            
+            let s = document.createElement("script");
+            s.innerText = `document.querySelector("#${element}").addEventListener("click", () => remove_tag("${element}"))`;
+            div.innerHTML = element;
+            tags_output.appendChild(div);
+            tags_output.appendChild(s);
+        });
+    }
+    
+    function remove_tag(tag) {
+        console.log("I remove " + tag)
+    }
+
+    // Select via child elements, because tags_input is always the second last.
+    // Other selectors could be changed by HTML that users puts on their post!
+    let form_element = document.querySelector("form");
+    let tags_input = form_element.children[form_element.childElementCount - 2];
+
+    tags_input.addEventListener("keyup", function(e){   
+        e.target.value = e.target.value.replace(" ", "");
+        update_tags(e.target);
+    });
+
+    document.addEventListener("DOMContentLoaded", function(){
+        tags_input.value = tags_input.value.replace(" ", "");
+        update_tags(tags_input);        
+    });
+</script>
+
+{% endblock %}
+
+
+    

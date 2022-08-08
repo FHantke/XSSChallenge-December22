@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1>{{ blog_user.username }}'s Blog</h1>
+
+<div class="row m-2">
+  {% set tags =blog_user.tags.split(',') %}
+  {% for tag in tags %}
+    <div class="col-2 m-1 border rounded bg-info">{{ tag }}</div>
+  {% endfor %}
+</div>
+
+  <!-- Modal -->
+<div class="modal fade" id="twitterModal" tabindex="-1" aria-labelledby="twitterModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="twitterModalLabel">Share this blog on Twitter</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          Edit your Tweet (this is a TODO):
+          <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" name="content">
+            Come and check this fantastic blog!
+            {{ request.url }}
+          </textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <a href="https://twitter.com/intent/tweet?text=Hello%20World&ref_src=twsrc%5Etfw" class="btn btn-primary">Share</a>
+        </div>
+      </div>
+    </div>
+</div>
+
+<div class="row border rounded mb-2 p-2">
+    {{ blog_user.content|safe }}
+</div>
+  
+<button type="button" class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#twitterModal" id="share-button">
+  Share this on Twitter
+</button>    
+
+<div class="row border rounded mb-2 p-2">
+  <div class="col-10">    
+    <form action="/comment/{{ blog_user.id }}" id="comment-form" method="POST">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <div class="form-group">
+          <label for="commentator-name">Write a Comment</label>
+          <input type="text" class="form-control" id="commentator-name" placeholder="Your Name" name="name">
+        </div>
+        <textarea class="form-control" id="commentator-text" rows="3" name="text">...</textarea>
+    </form>    
+  </div>
+  <div class="col-2">  
+    <input type="submit" class="btn btn-primary" form="comment-form">Submit</input>
+  </div>
+</div>
+
+{% for comment in blog_user.comments %}
+  <div class="row border rounded"><b>{{ comment.name }}:</b><br>{{ comment.text }}</div>
+{% endfor %}
+
+<script nonce="{{nonce}}">
+  document.addEventListener("DOMContentLoaded", function(){
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const share = urlParams.get('share')
+    if (share != null) {
+        let share_button = document.querySelector("#share-button");
+        share_button.click()
+    }
+  });
+</script>
+{% endblock %}
