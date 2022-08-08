@@ -53,7 +53,7 @@ def generate_nonce():
 def add_security_headers(resp):
     if 'nonce' not in g:
         g.nonce = secrets.token_hex()
-    resp.headers['Content-Security-Policy'] = f"default-src 'self' 'nonce-{g.nonce}' 'strict-dynamic'; img-src * data:;"
+    resp.headers['Content-Security-Policy'] = f"default-src 'self'; script-src 'self' 'nonce-{g.nonce}' 'strict-dynamic'; img-src * data:;"
     return resp
     
 @app.context_processor
