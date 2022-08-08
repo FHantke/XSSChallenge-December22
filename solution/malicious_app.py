@@ -30,7 +30,7 @@ def publish_blog(content):
     res = session.get(url, proxies=PROXIES)
     my_csrf_token = res.text.split('csrf_token" value="')[1].split('"/>')[0]
     print(f"My CSRF token: {my_csrf_token}")
-    # For some reason, sessions do not work with samesite=lax or strict? 
+    # Since cookie seeting is `secure`, the session does not send the cookie automatically
     cookies = session.cookies.get_dict()
 
     data = {"name": os.urandom(8).hex(), "csrf_token": my_csrf_token}
