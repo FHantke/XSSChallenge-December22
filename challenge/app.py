@@ -12,6 +12,9 @@ import os
 app = Flask(__name__)
 app.secret_key = os.urandom(12).hex()
 app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql+psycopg2://user:secret@db/blog"
+app.config['SESSION_COOKIE_SAMESITE'] = "Strict"
+app.config['SESSION_COOKIE_SECURE'] = True
+
 db = SQLAlchemy(app)
 csrf = CSRFProtect(app)
 login_manager = LoginManager(app)

@@ -4,8 +4,9 @@ from flask import Flask, render_template, request, redirect, url_for, flash, g
 import requests
 import os
 
-TARGET_DOMAIN = "http://127.0.0.1:5000"
+TARGET_DOMAIN = "http://127.0.0.1:1337"
 HOST_DOMAIN = "http://127.0.0.1:5001"
+PROXIES = {"http":"http://127.0.0.1:8080"}
 
 app = Flask(__name__)
 
@@ -26,20 +27,26 @@ def publish_blog(content):
 
     # Login
     url = f"{TARGET_DOMAIN}/login"    
-    res = session.get(url)
+    res = session.get(url, proxies=PROXIES)
     my_csrf_token = res.text.split('csrf_token" value="')[1].split('"/>')[0]
     print(f"My CSRF token: {my_csrf_token}")
+    # For some reason, sessions do not work with samesite=lax or strict? 
+    cookies = session.cookies.get_dict()
 
     data = {"name": os.urandom(8).hex(), "csrf_token": my_csrf_token}
-    res = session.post(url, data)
+    res = session.post(url, data, cookies=cookies, proxies=PROXIES, allow_redirects=False)
+    cookies = session.cookies.get_dict()
 
+    url = f"{TARGET_DOMAIN}/edit"
+    res = session.get(url,cookies=cookies, proxies=PROXIES, allow_redirects=False)
     my_csrf_token = res.text.split('csrf_token" value="')[1].split('"/>')[0]
     print(f"My CSRF token: {my_csrf_token}")
+    cookies = session.cookies.get_dict()
 
     # Publish Post
     url = f"{TARGET_DOMAIN}/edit"
     data = {"content": content, "tags": "a,b,c", "csrf_token": my_csrf_token}
-    res = session.post(url, data)
+    res = session.post(url, data, cookies=cookies, proxies=PROXIES)
     return res.url
 
 def create_csrf(csrf_token):
