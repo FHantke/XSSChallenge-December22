@@ -5,8 +5,20 @@ services:
         build: ./challenge
         command: gunicorn --bind 0.0.0.0:1337 app:app
         restart: unless-stopped
+        environment:
+            # medium or hard
+            DIFFICULTY: hard
+            POSTGRES_USER: user
+            POSTGRES_DB: blog
+            POSTGRES_PASSWORD: secret
         ports:
             - "1337:1337"
+        depends_on:
+          db:
+            condition: service_healthy
+        links:
+          - db
+
     db:
         image: postgres
         restart: always
@@ -15,6 +27,11 @@ services:
             POSTGRES_USER: user
             POSTGRES_DB: blog
             POSTGRES_PASSWORD: secret
+        healthcheck:
+          test: pg_isready -U user -d blog
+          interval: 2s
+          timeout: 1s
+          retries: 5
         volumes:
             - ./database:/var/lib/postgresql/data 
 

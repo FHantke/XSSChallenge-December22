@@ -8,10 +8,16 @@ from sanitizer import sanitize_html
 from uuid import uuid4
 import secrets
 import os
+import re
 
 app = Flask(__name__)
 app.secret_key = os.urandom(12).hex()
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql+psycopg2://user:secret@db/blog"
+
+postgres_user = os.environ.get("POSTGRES_USER", default="user")
+postgres_db = os.environ.get("POSTGRES_DB", default="blog")
+postgres_password = os.environ.get("POSTGRES_PASSWORD", default="secret")
+app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql+psycopg2://{postgres_user}:{postgres_password}@db/{postgres_db}"
+
 app.config['SESSION_COOKIE_SAMESITE'] = "Strict"
 app.config['SESSION_COOKIE_SECURE'] = True
 
@@ -122,6 +128,7 @@ def send_comment(user_id):
 
     name = request.form.get('name', None)
     text = request.form.get('text', None)
+
     if not name or not text:
         flash('You need a name and text for your comment.', 'danger')
         return redirect(f"/user/{user_id}")
@@ -141,8 +148,14 @@ def edit_view():
         return render_template("editor.html")
         
     content = request.form.get('content', None)
-    print(content)
     tags = request.form.get('tags', None)
+
+    dif = os.environ.get("DIFFICULTY", default="medium")
+    print(f"DIF is {dif}")
+    if dif == "hard":
+        print(f"{tags}")
+        tags = re.sub(r'[^a-zA-Z0-9,]', '', tags)
+        print(f"{tags}")
     
     if not content or not tags:
         flash('You need content and tags for your post.', 'danger')
@@ -153,7 +166,6 @@ def edit_view():
     flask_login.current_user.tags = tags
     db.session.commit()
 
-    print(g.nonce)
 
     return redirect(f"/blog/{flask_login.current_user.id}")    
 

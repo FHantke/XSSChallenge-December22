@@ -1,6 +1,9 @@
 # XSS Challenge
 This XSS challenge is a proposal for the monthly Intigriti XSS challenge.
 
+## Difficulty
+The challenge difficulty depends on your settigns inside of `docker-compose.yml` and can be set to either `medium` or `hard`. There is no `easy` :)
+
 ## Setup
 Everything you need to setup the challenge is inside the challenge directory. You can use docker to start it:
 ```

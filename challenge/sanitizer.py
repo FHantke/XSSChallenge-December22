@@ -14,7 +14,6 @@ def sanitize_token(token):
         if token_type in ("StartTag", "EndTag", "EmptyTag"):
             name = token["name"]
             namespace = token["namespace"]
-            print(f"{namespace}: {name}")
             if namespace != "http://www.w3.org/1999/xhtml":
                 return disallowed_token(token)
             if name in ELEMENTS_NOT_ALLOWED:
@@ -29,7 +28,6 @@ def allowed_token(token):
     if "data" in token:
         attrs = token["data"]
         attr_names = set(attrs.keys())
-        print(attr_names)
         for to_remove in [n for n in attr_names if n[1].startswith("on")]:
             del token["data"][to_remove]
             attr_names.remove(to_remove)

