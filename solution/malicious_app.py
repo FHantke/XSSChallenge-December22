@@ -55,7 +55,7 @@ def publish_blog(content):
 def create_csrf(csrf_token):
     if VARIANT == 1:
         xss_payload = '''
-            comment"); alert(document.querySelector(".navbar-brand").innerText.split(" ")[2]);//
+            comment"); alert(document.querySelector("a.navbar-brand").innerText.split("-")[1]);//
             <noscript><p title='</noscript>&lt;/TEXTAREA&gt; <div></div></FORM><xx swallow="'>
             </p></noscript>
         '''

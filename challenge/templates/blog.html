@@ -14,54 +14,75 @@
 <div class="modal fade" id="twitterModal" tabindex="-1" aria-labelledby="twitterModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
-        <div class="modal-header">
+        <div class="modal-header bg-dark">
           <h5 class="modal-title" id="twitterModalLabel">Share this blog on Twitter</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body">
-          Edit your Tweet (this is a TODO):
-          <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" name="content">
-            Come and check this fantastic blog!
-            {{ request.url }}
-          </textarea>
+        <div class="modal-body bg-dark">
+          Edit your Tweet:
+          <textarea class="form-control" id="share-area" rows="3" name="content">Check out this fantastic #intigriti-xss blog post! {{ request.url }}</textarea>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <a href="https://twitter.com/intent/tweet?text=Hello%20World&ref_src=twsrc%5Etfw" class="btn btn-primary">Share</a>
+        <div class="modal-footer bg-dark">
+          <button type="button" class="btn btn-primary text-light" data-bs-dismiss="modal">Close</button>
+          <a href="https://twitter.com/intent/tweet?text=Hello%20World&ref_src=twsrc%5Etfw" id="twitter-button" class="btn btn-primary text-light">Share</a>
         </div>
       </div>
     </div>
 </div>
 
-<div class="row border rounded mb-2 p-2">
+<div class="row border rounded bg-dark bg-opacity-75 mb-2 p-2 px-5">
     {{ blog_user.content|safe }}
 </div>
   
-<button type="button" class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#twitterModal" id="share-button">
+<button type="button" class="btn btn-primary mb-2 text-light" data-bs-toggle="modal" data-bs-target="#twitterModal" id="share-button">
   Share this on Twitter
 </button>    
 
+<hr>
+
 <div class="row border rounded mb-2 p-2">
-  <div class="col-10">    
+  <div class="col">    
     <form action="/comment/{{ blog_user.id }}" id="comment-form" method="POST">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-        <div class="form-group">
-          <label for="commentator-name">Write a Comment</label>
+
+      <div class="row pb-2 gy-4 g-3">
+        <label for="commentator-name" class="col col-form-label">Write a comment:</label>
+        <div class="col">
           <input type="text" class="form-control" id="commentator-name" placeholder="Your Name" name="name">
         </div>
+        <div class="col d-grid p-0">
+          <input type="submit" class="btn btn-primary text-light" form="comment-form" value="Post"></input>
+        </div>
+      </div>
+      <div class="row gy-4 g-3">
         <textarea class="form-control" id="commentator-text" rows="3" name="text">...</textarea>
+      </div>
     </form>    
-  </div>
-  <div class="col-2">  
-    <input type="submit" class="btn btn-primary" form="comment-form">Submit</input>
   </div>
 </div>
 
 {% for comment in blog_user.comments %}
-  <div class="row border rounded"><b>{{ comment.name }}:</b><br>{{ comment.text }}</div>
+  <div class="row border rounded mb-2">
+    <div class="row pb-2">
+      <b>{{ comment.name }}:</b>
+    </div>
+    <div class="row">
+      <p>
+        {{ comment.text }}
+      </p>
+    </div>
+  </div>
 {% endfor %}
 
 <script nonce="{{nonce}}">
+
+  function change_share_url() {
+    const share_area = document.querySelector("#share-area");
+    const twitter_button = document.querySelector("#twitter-button");
+    let share_content = share_area.value;
+    twitter_button.href = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(share_content);
+  }
+
   document.addEventListener("DOMContentLoaded", function(){
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
@@ -70,6 +91,12 @@
         let share_button = document.querySelector("#share-button");
         share_button.click()
     }
+
+    change_share_url()
+    document.querySelector("#share-area").addEventListener("keyup", function(){
+      change_share_url()
+    });
+
   });
 </script>
 {% endblock %}

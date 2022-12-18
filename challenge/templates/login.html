@@ -1,17 +1,23 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h1>{{Login}}</h1>
-<form action='/login' method='POST' class="form-inline">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-    <div class="row g-3 align-items-center">        
-        <div class="col">              
-            <input class="form-control" type="text" id="name" name="name" placeholder="Username"></input>
-        </div>                
-        <div class="col">
-            <button type="submit" class="btn btn-primary">Login</button>
-        </col>
-    </div>
-</form>
+<div class="d-flex justify-content-center m-5">
+    <form action='/login' method='POST' class="form-inline">
+        <div class="row pb-2">
+            <h1>Create Your Account And Login!</h1>
+        </div>  
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <div class="row g-3 align-items-center pb-2">        
+            <div class="col">              
+                <input class="form-control" type="text" id="name" name="name" placeholder="Username"></input>
+            </div>             
+        </div>
+        <div class="row g-3 align-items-center">  
+            <div class="col d-grid">
+                <button type="submit" class="btn btn-primary">Login</button>
+            </col>
+        </div>
+    </form>
+</div>
 
 {% endblock %}

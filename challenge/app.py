@@ -2,6 +2,7 @@ from unicodedata import name
 from flask import Flask, render_template, request, redirect, url_for, flash, g
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect, CSRFError
+from flask_assets import Environment, Bundle
 from flask_login import LoginManager
 import flask_login
 from sanitizer import sanitize_html
@@ -26,6 +27,11 @@ csrf = CSRFProtect(app)
 login_manager = LoginManager(app)
 login_manager.session_protection = "strong"
 
+assets = Environment(app)
+assets.url = app.static_url_path
+scss = Bundle('assets/style.scss', filters='libsass', output='css/style.css')
+assets.register('scss_all', scss)
+
 class User(db.Model, flask_login.UserMixin):
     __tablename__ = "user"
     id = db.Column(db.String, primary_key=True)
@@ -42,8 +48,23 @@ class Comment(db.Model):
     user_id = db.Column(db.String, db.ForeignKey("user.id"))
     user = db.relationship("User", back_populates="comments")
 
+
+def init_defaults():
+    if User.query.first() is None:
+        from data import users
+        for user_dict in users:
+            user = User(
+                id=user_dict["id"],
+                username=user_dict["name"],
+                content=user_dict["content"],
+                tags=user_dict["tags"]
+            )
+            db.session.add(user)
+    db.session.commit()
+
 with app.app_context():
     db.create_all()
+    init_defaults()
 
 def get_user(user_id=None, name=None):
     user = db.session.query(User).filter(
@@ -123,7 +144,8 @@ def user_view(user_id):
 @app.route("/comment/<user_id>", methods=['POST'])
 def send_comment(user_id):
     user = get_user(user_id)
-    if not user:
+
+    if not user.is_authenticated:
         return redirect("/")
 
     name = request.form.get('name', None)
@@ -171,4 +193,5 @@ def edit_view():
 
 if __name__ == '__main__':
     db.create_all()
+    init_defaults()
     app.run()
