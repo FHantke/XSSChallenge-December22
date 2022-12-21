@@ -19,7 +19,7 @@ postgres_db = os.environ.get("POSTGRES_DB", default="blog")
 postgres_password = os.environ.get("POSTGRES_PASSWORD", default="secret")
 app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql+psycopg2://{postgres_user}:{postgres_password}@db/{postgres_db}"
 
-app.config['SESSION_COOKIE_SAMESITE'] = "Strict"
+app.config['SESSION_COOKIE_SAMESITE'] = "Lax"
 app.config['SESSION_COOKIE_SECURE'] = True
 
 db = SQLAlchemy(app)

