@@ -102,6 +102,7 @@ def unauthorized_handler():
     return redirect(url_for('login'))
     
 @app.route("/")
+@app.route("/challenge")
 def index_view():
     return render_template("index.html")
 

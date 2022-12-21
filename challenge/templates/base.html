@@ -22,7 +22,8 @@
     <!-- As a link -->
     <nav class="navbar navbar-dark bg-dark navbar-expand-lg">
         <div class="container-fluid">
-          <a class="navbar-brand" href="/">
+	  <!-- /challenge only for the Intigriti challenge, else it should be / -->
+          <a class="navbar-brand" href="/challenge">
             Christmas Blog      
             {% if current_user.is_authenticated %}
             - {{current_user.username}}
